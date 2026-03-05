@@ -1,0 +1,90 @@
+mixed-port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+ipv6: false
+
+proxy-providers:
+  sub1:
+    type: http
+    url: https://dy.008816.xyz/link1
+    interval: 3600
+
+  sub2:
+    type: http
+    url: https://zhuzhuzhu.whtjdasha.com/api/v1/client/subscribe?token=82dea9d68fec6221abfd43e520270ee2
+    interval: 3600
+
+  sub3:
+    type: http
+    url: https://xship.top/v1/subscribe?starlink=34RhFnnyTjFVqyC-CMuslgzB
+    interval: 3600
+
+proxy-groups:
+
+  - name: AI
+    type: select
+    use:
+      - sub1
+      - sub2
+      - sub3
+    filter: "(Gemini|Grok|GPT|X|家宽|流媒体)"
+    exclude-filter: "(香港|HK|Hong)"
+
+  - name: YouTube
+    type: url-test
+    use:
+      - sub1
+      - sub2
+      - sub3
+    url: http://www.youtube.com/generate_204
+    interval: 300
+
+  - name: Telegram
+    type: url-test
+    use:
+      - sub1
+      - sub2
+      - sub3
+    url: https://telegram.org
+    interval: 300
+
+  - name: Fallback
+    type: fallback
+    proxies:
+      - YouTube
+    url: http://www.youtube.com/generate_204
+    interval: 300
+
+  - name: Leak
+    type: select
+    proxies:
+      - YouTube
+
+  - name: DIRECT
+    type: select
+    proxies:
+      - DIRECT
+
+rules:
+
+  # AI 类
+  - DOMAIN-SUFFIX,gemini.google.com,AI
+  - DOMAIN-SUFFIX,grok.com,AI
+  - DOMAIN-SUFFIX,x.ai,AI
+  - DOMAIN-SUFFIX,openai.com,AI
+  - DOMAIN-SUFFIX,chatgpt.com,AI
+
+  # YouTube
+  - DOMAIN-SUFFIX,youtube.com,YouTube
+  - DOMAIN-SUFFIX,googlevideo.com,YouTube
+
+  # Telegram
+  - DOMAIN-SUFFIX,telegram.org,Telegram
+  - DOMAIN-SUFFIX,t.me,Telegram
+
+  # 国内直连
+  - GEOIP,CN,DIRECT
+
+  # 其他流量
+  - MATCH,Leak
