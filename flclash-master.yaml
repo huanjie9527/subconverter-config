@@ -1,6 +1,6 @@
-# ==========================================
-# FlClash (Mihomo) 稳定完整版配置
-# ==========================================
+# ===============================
+# FlClash 超稳定安全版
+# ===============================
 
 mixed-port: 7890
 allow-lan: true
@@ -8,11 +8,8 @@ mode: rule
 log-level: info
 ipv6: false
 
-# -----------------------------
-# 代理订阅
-# -----------------------------
 proxy-providers:
-  Sub1_主力:
+  Sub1:
     type: http
     url: https://dy.008816.xyz/link1
     interval: 3600
@@ -21,7 +18,7 @@ proxy-providers:
       url: http://www.google.com/generate_204
       interval: 300
 
-  Sub2_备用:
+  Sub2:
     type: http
     url: https://xship.top/v1/subscribe?starlink=34RhFnnyTjFVqyC-CMuslgzB
     interval: 3600
@@ -31,106 +28,50 @@ proxy-providers:
       interval: 300
 
 
-# -----------------------------
-# 策略组
-# -----------------------------
 proxy-groups:
 
-  - name: "🧠 Gemini专属"
+  - name: Gemini
     type: select
     use:
-      - Sub1_主力
-      - Sub2_备用
-    filter: '^(?!.*(港|HK|Hong)).*Gemini.*'
-    proxies:
-      - "🤖 严格AI"
+      - Sub1
+      - Sub2
 
-  - name: "🤖 严格AI"
+  - name: AI
     type: select
     use:
-      - Sub1_主力
-      - Sub2_备用
-    filter: '^(?!.*(港|HK|Hong)).*(GPT|Chat|Grok|Claude|解锁|原生|Netflix|流媒体|家宽|住宅|ISP).*'
-    proxies:
-      - "🇺🇸 AI-US"
-      - "🇸🇬 AI-SG"
-      - "🇯🇵 AI-JP"
+      - Sub1
+      - Sub2
 
-  - name: "🔍 谷歌服务"
-    type: select
-    proxies:
-      - "🇺🇸 AI-US"
-      - "🇸🇬 AI-SG"
-      - "🇯🇵 AI-JP"
-
-  - name: "📹 YouTube"
+  - name: YouTube
     type: url-test
     use:
-      - Sub1_主力
-      - Sub2_备用
+      - Sub1
+      - Sub2
     url: http://www.youtube.com/generate_204
     interval: 300
 
-  - name: "📱 Telegram"
+  - name: Telegram
     type: url-test
     use:
-      - Sub1_主力
-      - Sub2_备用
+      - Sub1
+      - Sub2
     url: http://www.google.com/generate_204
     interval: 300
 
-  - name: "🇺🇸 AI-US"
-    type: url-test
-    use:
-      - Sub1_主力
-      - Sub2_备用
-    filter: '(?i)(美国|US|United States)'
-    url: http://www.google.com/generate_204
-    interval: 300
-
-  - name: "🇸🇬 AI-SG"
-    type: url-test
-    use:
-      - Sub1_主力
-      - Sub2_备用
-    filter: '(?i)(新加坡|SG|Singapore)'
-    url: http://www.google.com/generate_204
-    interval: 300
-
-  - name: "🇯🇵 AI-JP"
-    type: url-test
-    use:
-      - Sub1_主力
-      - Sub2_备用
-    filter: '(?i)(日本|JP|Japan)'
-    url: http://www.google.com/generate_204
-    interval: 300
-
-  - name: "🛑 故障转移"
-    type: fallback
-    use:
-      - Sub1_主力
-      - Sub2_备用
-    url: http://www.google.com/generate_204
-    interval: 300
-
-  - name: "🎯 全球直连"
+  - name: DIRECT-OUT
     type: select
     proxies:
       - DIRECT
 
-  - name: "🐟 漏网之鱼"
-    type: select
-    proxies:
-      - "📹 YouTube"
-      - "🎯 全球直连"
-      - "🔍 谷歌服务"
-      - "🛑 故障转移"
+  - name: AUTO
+    type: fallback
+    use:
+      - Sub1
+      - Sub2
+    url: http://www.google.com/generate_204
+    interval: 300
 
 
-# -----------------------------
-# 远程规则集
-# -----------------------------
 rule-providers:
 
   LocalAreaNetwork:
@@ -139,38 +80,8 @@ rule-providers:
     url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
     interval: 86400
 
-  UnBan:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list
-    interval: 86400
-
-  GoogleCN:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list
-    interval: 86400
-
-  YouTubeRule:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list
-    interval: 86400
-
-  PornRule:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Porn.list
-    interval: 86400
-
-  GithubRule:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Github.list
-    interval: 86400
-
   OpenAiRule:
-请在此输入文件内容
+    type: http
     behavior: classical
     url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
     interval: 86400
@@ -182,30 +93,11 @@ rule-providers:
     interval: 86400
 
 
-# -----------------------------
-# 分流规则
-# -----------------------------
 rules:
 
-  - "DOMAIN,u.pcloud.link,🎯 全球直连"
-  - "DOMAIN-SUFFIX,pcloud.com,🎯 全球直连"
-  - "DOMAIN-SUFFIX,baidu.com,🎯 全球直连"
-
-  - "RULE-SET,LocalAreaNetwork,🎯 全球直连"
-  - "RULE-SET,UnBan,🎯 全球直连"
-  - "RULE-SET,GoogleCN,🎯 全球直连"
-
-  - "RULE-SET,YouTubeRule,📹 YouTube"
-  - "RULE-SET,PornRule,📹 YouTube"
-  - "RULE-SET,GithubRule,📹 YouTube"
-
-  - "DOMAIN-SUFFIX,gemini.google.com,🧠 Gemini专属"
-
-  - "RULE-SET,OpenAiRule,🤖 严格AI"
-  - "DOMAIN-SUFFIX,grok.com,🤖 严格AI"
-  - "DOMAIN-SUFFIX,claude.ai,🤖 严格AI"
-
-  - "RULE-SET,TelegramRule,📱 Telegram"
-
-  - "GEOIP,CN,🎯 全球直连"
-  - "MATCH,🐟 漏网之鱼"
+  - "RULE-SET,LocalAreaNetwork,DIRECT-OUT"
+  - "RULE-SET,OpenAiRule,AI"
+  - "RULE-SET,TelegramRule,Telegram"
+  - "DOMAIN-SUFFIX,youtube.com,YouTube"
+  - "GEOIP,CN,DIRECT-OUT"
+  - "MATCH,AUTO"
