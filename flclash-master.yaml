@@ -1,0 +1,186 @@
+# Flclash (Mihomo) 终极本地合并配置
+# ==========================================
+
+# 1. 代理集合 (让软件自己去拉取你的两个订阅)
+proxy-providers:
+  Sub1_主力:
+    type: http
+    url: "https://dy.008816.xyz/link1"
+    interval: 3600
+    health-check:
+      enable: true
+      url: http://www.google.com/generate_204
+      interval: 300
+  Sub2_备用:
+    type: http
+    url: "https://xship.top/v1/subscribe?starlink=34RhFnnyTjFVqyC-CMuslgzB"
+    interval: 3600
+    health-check:
+      enable: true
+      url: http://www.google.com/generate_204
+      interval: 300
+
+# 2. 策略组 (智能筛选与分类)
+proxy-groups:
+  - name: 🧠 Gemini专属
+    type: select
+    use: [Sub1_主力, Sub2_备用]
+    filter: '^(?!.*(港|HK|Hong)).*Gemini.*'
+    proxies: [🤖 严格AI]
+
+  - name: 🤖 严格AI
+    type: select
+    use: [Sub1_主力, Sub2_备用]
+    filter: '^(?!.*(港|HK|Hong)).*(GPT|解锁|Chat|原生|Grok|奈飞|Netflix|流媒体|家宽|住宅|ISP).*'
+    proxies: [🇺🇸 AI-US, 🇸🇬 AI-SG, 🇯🇵 AI-JP]
+
+  - name: 🔍 谷歌服务
+    type: select
+    proxies: [🇺🇸 AI-US, 🇸🇬 AI-SG, 🇯🇵 AI-JP]
+
+  - name: 📹 YouTube
+    type: url-test
+    use: [Sub1_主力, Sub2_备用]
+    url: http://www.youtube.com/generate_204
+    interval: 300
+
+  - name: 📱 Telegram
+    type: url-test
+    use: [Sub1_主力, Sub2_备用]
+    url: http://www.google.com/generate_204
+    interval: 300
+
+  - name: 🇺🇸 AI-US
+    type: url-test
+    use: [Sub1_主力, Sub2_备用]
+    filter: '(?i)(美国|US|United States)'
+    url: http://www.google.com/generate_204
+    interval: 300
+
+  - name: 🇸🇬 AI-SG
+    type: url-test
+    use: [Sub1_主力, Sub2_备用]
+    filter: '(?i)(新加坡|SG|Singapore)'
+    url: http://www.google.com/generate_204
+    interval: 300
+
+  - name: 🇯🇵 AI-JP
+    type: url-test
+    use: [Sub1_主力, Sub2_备用]
+    filter: '(?i)(日本|JP|Japan)'
+    url: http://www.google.com/generate_204
+    interval: 300
+
+  - name: 🛑 故障转移
+    type: fallback
+    use: [Sub1_主力, Sub2_备用]
+    url: http://www.google.com/generate_204
+    interval: 300
+
+  - name: 🎯 全球直连
+    type: select
+    proxies: [DIRECT]
+
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies: [📹 YouTube, 🎯 全球直连, 🔍 谷歌服务, 🛑 故障转移]
+
+# 3. 远程规则集 (ACL4SSR)
+rule-providers:
+  LocalAreaNetwork:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list"
+    interval: 86400
+  UnBan:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list"
+    interval: 86400
+  GoogleCN:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list"
+    interval: 86400
+  YouTubeRule:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list"
+    interval: 86400
+  PornRule:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Porn.list"
+    interval: 86400
+  GithubRule:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Github.list"
+    interval: 86400
+  OpenAiRule:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list"
+    interval: 86400
+请在此输入文件内容
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Telegram.list"
+    interval: 86400
+
+# 4. 路由分流规则 (由上到下匹配)
+rules:
+  # --- 你的私有直连 ---
+  - DOMAIN,u.pcloud.link,🎯 全球直连
+  - DOMAIN,pcdn-u.pcloud.com,🎯 全球直连
+  - DOMAIN,api.pcloud.com,🎯 全球直连
+  - DOMAIN-SUFFIX,pcloud.com,🎯 全球直连
+  - DOMAIN-SUFFIX,pcloud.link,🎯 全球直连
+  - DOMAIN-SUFFIX,pclouddns.com,🎯 全球直连
+  - DOMAIN-SUFFIX,p-cdn.com,🎯 全球直连
+  - DOMAIN-KEYWORD,pcloud,🎯 全球直连
+  - DOMAIN-SUFFIX,baidu.com,🎯 全球直连
+  - DOMAIN-SUFFIX,baidupcs.com,🎯 全球直连
+  - DOMAIN-SUFFIX,iflytek.com,🎯 全球直连
+  - DOMAIN-SUFFIX,xfyun.cn,🎯 全球直连
+  - DOMAIN-KEYWORD,iflytek,🎯 全球直连
+
+  # --- 远程规则集直连 ---
+  - RULE-SET,LocalAreaNetwork,🎯 全球直连
+  - RULE-SET,UnBan,🎯 全球直连
+  - RULE-SET,GoogleCN,🎯 全球直连
+
+  # --- 视频与社交 ---
+  - RULE-SET,YouTubeRule,📹 YouTube
+  - DOMAIN-SUFFIX,youtube.com,📹 YouTube
+  - DOMAIN-SUFFIX,googlevideo.com,📹 YouTube
+  - DOMAIN-SUFFIX,ytimg.com,📹 YouTube
+  - DOMAIN-SUFFIX,twitter.com,📹 YouTube
+  - DOMAIN-SUFFIX,x.com,📹 YouTube
+  - DOMAIN-SUFFIX,t.co,📹 YouTube
+  - DOMAIN-SUFFIX,twimg.com,📹 YouTube
+  - DOMAIN-KEYWORD,twitter,📹 YouTube
+  - RULE-SET,PornRule,📹 YouTube
+  - RULE-SET,GithubRule,📹 YouTube
+
+  # --- 🧠 Gemini专属 ---
+  - DOMAIN-SUFFIX,gemini.google.com,🧠 Gemini专属
+  - DOMAIN-SUFFIX,bard.google.com,🧠 Gemini专属
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,🧠 Gemini专属
+
+  # --- 🤖 严格AI ---
+  - RULE-SET,OpenAiRule,🤖 严格AI
+  - DOMAIN-SUFFIX,grok.com,🤖 严格AI
+  - DOMAIN-SUFFIX,x.ai,🤖 严格AI
+  - DOMAIN-SUFFIX,claude.ai,🤖 严格AI
+  - DOMAIN-SUFFIX,anthropic.com,🤖 严格AI
+
+  # --- 🔍 谷歌服务 ---
+  - DOMAIN-SUFFIX,google.com,🔍 谷歌服务
+
+  # --- 📱 Telegram ---
+  - RULE-SET,TelegramRule,📱 Telegram
+
+  # --- 兜底 ---
+  - GEOIP,CN,🎯 全球直连
+  - MATCH,🐟 漏网之鱼
