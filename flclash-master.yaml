@@ -1,103 +1,81 @@
-# ===============================
-# FlClash 超稳定安全版
-# ===============================
-
 mixed-port: 7890
-allow-lan: true
+allow-lan： 真
 mode: rule
 log-level: info
 ipv6: false
 
 proxy-providers:
-  Sub1:
+  sub1:
     type: http
     url: https://dy.008816.xyz/link1
     interval: 3600
-    health-check:
-      enable: true
-      url: http://www.google.com/generate_204
-      interval: 300
 
-  Sub2:
+  sub2:
+    type: http
+    url: https://zhuzhuzhu.whtjdasha.com/api/v1/client/subscribe?token=82dea9d68fec6221abfd43e520270ee2
+    interval: 3600
+
+  sub3:
     type: http
     url: https://xship.top/v1/subscribe?starlink=34RhFnnyTjFVqyC-CMuslgzB
     interval: 3600
-    health-check:
-      enable: true
-      url: http://www.google.com/generate_204
-      interval: 300
 
 
 proxy-groups:
 
-  - name: Gemini
-    type: select
-    use:
-      - Sub1
-      - Sub2
-
   - name: AI
     type: select
     use:
-      - Sub1
-      - Sub2
+      - sub1
+      - sub2
+      - sub3
+    filter: "(家宽|流媒体|Gemini|GPT|Grok)"
+    exclude-filter: "(香港|HK|Hong)"
 
   - name: YouTube
     type: url-test
     use:
-      - Sub1
-      - Sub2
+      - sub1
+      - sub2
+      - sub3
     url: http://www.youtube.com/generate_204
     interval: 300
 
   - name: Telegram
     type: url-test
     use:
-      - Sub1
-      - Sub2
-    url: http://www.google.com/generate_204
+      - sub1
+      - sub2
+      - sub3
+    url: https://telegram.org
     interval: 300
 
-  - name: DIRECT-OUT
+  - name: Fallback
+    type: fallback
+    proxies:
+      - YouTube
+    url: http://www.youtube.com/generate_204
+    interval: 300
+
+  - name: Others
     type: select
     proxies:
-      - DIRECT
-
-  - name: AUTO
-    type: fallback
-    use:
-      - Sub1
-      - Sub2
-    url: http://www.google.com/generate_204
-    interval: 300
-
-
-rule-providers:
-
-  LocalAreaNetwork:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
-    interval: 86400
-
-  OpenAiRule:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
-    interval: 86400
-
-  TelegramRule:
-    type: http
-    behavior: classical
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Telegram.list
-    interval: 86400
+      - YouTube
 
 
 rules:
 
-  - "RULE-SET,LocalAreaNetwork,DIRECT-OUT"
-  - "RULE-SET,OpenAiRule,AI"
-  - "RULE-SET,TelegramRule,Telegram"
-  - "DOMAIN-SUFFIX,youtube.com,YouTube"
-  - "GEOIP,CN,DIRECT-OUT"
-  - "MATCH,AUTO"
+  - DOMAIN-SUFFIX,gemini.google.com,AI
+  - DOMAIN-SUFFIX,bard.google.com,AI
+  - DOMAIN-SUFFIX,openai.com,AI
+  - DOMAIN-SUFFIX,chatgpt.com,AI
+  - DOMAIN-SUFFIX,grok.com,AI
+  - DOMAIN-SUFFIX,x.ai,AI
+
+  - DOMAIN-SUFFIX,youtube.com,YouTube
+  - DOMAIN-SUFFIX,googlevideo.com,YouTube
+
+  - DOMAIN-SUFFIX,telegram.org,Telegram
+  - DOMAIN-SUFFIX,t.me,Telegram
+
+  - MATCH,Others
